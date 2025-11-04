@@ -26,6 +26,15 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set CalVer tag
+        id: calver
+        run: |
+          YEAR=$(date +'%Y')
+          MONTH=$(date +'%m' | sed 's/^0//')
+          RELEASE=${GITHUB_RUN_NUMBER}
+          echo "tag=${YEAR}.${MONTH}.${RELEASE}" >> $GITHUB_OUTPUT
+
       
       # Build and push image
       - name: Build and push

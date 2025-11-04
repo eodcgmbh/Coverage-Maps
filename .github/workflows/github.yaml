@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - dask_gateway/**
+      - src/**
 
 jobs:
   build-and-push:
@@ -31,7 +31,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./dask_gateway
+          context: ./src
           push: true
           tags: ghcr.io/${{ github.repository }}/coverage_maps:latest
           file: Dockerfile

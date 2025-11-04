@@ -21,6 +21,8 @@ RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --only main --no-
 
 FROM python:3.12-slim-bookworm AS runtime
 
+RUN apt-get update && apt-get install -y libpq5 && rm -rf /var/lib/apt/lists/*
+
 ENV VIRTUAL_ENV=/app/.venv
 ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 
@@ -30,3 +32,4 @@ COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 COPY src ./src
 
 CMD ["uvicorn", "src.api.app:app", "--reload", "--host", "0.0.0.0", "--port", "4000"]
+

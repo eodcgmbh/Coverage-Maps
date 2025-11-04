@@ -7,9 +7,9 @@ class Connect:
     def __init__(self, host="localhost", port=5000, database=None, user=None, password=None, query=None):
         self.host = host
         self.port = port
-        self.database = os.environ.get("db")
-        self.user = os.environ.get("user")
-        self.password = os.environ.get("password")
+        self.database = os.environ.get("DB_HOST")
+        self.user = os.environ.get("DB_USER")
+        self.password = os.environ.get("DB_PASSWORD")
         self.conn = None
         self.query = query
 

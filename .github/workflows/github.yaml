@@ -33,5 +33,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/eodcgmbh/coverage-maps/coverage_maps:latest
+          tags: |
+            ghcr.io/eodcgmbh/coverage-maps/coverage_maps:latest
+            ghcr.io/eodcgmbh/coverage-maps/coverage_maps:${{ steps.calver.outputs.tag }}
           file: Dockerfile

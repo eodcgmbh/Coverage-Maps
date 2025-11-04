@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - src/**
-
+workflow_dispatch:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./src
+          context: .
           push: true
           tags: ghcr.io/${{ github.repository }}/coverage_maps:latest
           file: Dockerfile

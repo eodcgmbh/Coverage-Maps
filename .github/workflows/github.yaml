@@ -33,5 +33,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}/coverage_maps:latest
+          tags: ghcr.io/${{ github.repository | toLowerCase }}/coverage_maps:latest
           file: Dockerfile

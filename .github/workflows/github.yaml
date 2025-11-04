@@ -6,7 +6,7 @@ on:
       - main
     paths:
       - src/**
-workflow_dispatch:
+  workflow_dispatch:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

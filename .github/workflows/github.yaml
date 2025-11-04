@@ -7,6 +7,12 @@ on:
     paths:
       - src/**
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'year.month.release'
+        required: true
+        default: 
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -44,5 +50,5 @@ jobs:
           push: true
           tags: |
             ghcr.io/eodcgmbh/coverage-maps/coverage_maps:latest
-            ghcr.io/eodcgmbh/coverage-maps/coverage_maps:${{ steps.calver.outputs.tag }}
+            ghcr.io/eodcgmbh/coverage-maps/coverage_maps:${{ github.event.inputs.release_version }}
           file: Dockerfile

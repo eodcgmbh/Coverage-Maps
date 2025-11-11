@@ -5,8 +5,8 @@ from psycopg2 import OperationalError, Error
 
 class Connect:
     def __init__(self, host="localhost", port=5000, database=None, user=None, password=None, query=None):
-        self.host = host
-        self.port = port
+        self.host = os.environ.get("DB_IP")
+        self.port = os.environ.get("DB_PORT")
         self.database = os.environ.get("DB_HOST")
         self.user = os.environ.get("DB_USER")
         self.password = os.environ.get("DB_PASSWORD")
@@ -37,13 +37,13 @@ class Connect:
         query = """
             WITH grid AS (
                 SELECT lon, lat,
-                    ST_SetSRID(ST_MakeEnvelope(lon, lat, lon + 1, lat + 1, 4326), 4326) AS cell_geom
-                FROM generate_series(%s, %s + 1, 1) AS lon,
-                    generate_series(%s, %s + 1, 1) AS lat
+                    ST_SetSRID(ST_MakeEnvelope(lon, lat, lon + 2, lat + 2, 4326), 4326) AS cell_geom
+                FROM generate_series(%s, %s + 2, 2) AS lon,
+                    generate_series(%s, %s + 2, 2) AS lat
             ),
             counts AS (
                 SELECT g.cell_geom, COUNT(*) AS cnt
-                FROM items i
+                FROM pgstac.items i
                 JOIN grid g ON ST_Intersects(i.geometry, g.cell_geom)
                 WHERE i.datetime >= %s
                 AND i.end_datetime <= %s

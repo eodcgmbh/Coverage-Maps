@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "coverage-map"
-version = "0.1.0"
+version = "2025.11.2"
 description = ""
 authors = ["Simon Mosonyi <simon.mosonyi@eodc.eu>"]
 readme = "README.md"

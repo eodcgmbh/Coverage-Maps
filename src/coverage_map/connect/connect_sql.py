@@ -34,20 +34,22 @@ class Connect:
         """
         Builds a grid-based spatial aggregation query.
         """
+
         query = """
             WITH grid AS (
                 SELECT lon, lat,
-                    ST_SetSRID(ST_MakeEnvelope(lon, lat, lon + 2, lat + 2, 4326), 4326) AS cell_geom
-                FROM generate_series(%s, %s + 2, 2) AS lon,
-                    generate_series(%s, %s + 2, 2) AS lat
+                    ST_SetSRID(ST_MakeEnvelope(lon, lat, lon + %(resolution)s, lat + %(resolution)s, 4326), 4326) AS cell_geom
+                FROM generate_series(%(lonmin)s, %(lonmax)s + %(resolution)s, %(resolution)s) AS lon,
+                    generate_series(%(latmin)s, %(latmax)s + %(resolution)s, %(resolution)s) AS lat
             ),
             counts AS (
                 SELECT g.cell_geom, COUNT(*) AS cnt
                 FROM pgstac.items i
                 JOIN grid g ON ST_Intersects(i.geometry, g.cell_geom)
-                WHERE i.datetime >= %s
-                AND i.end_datetime <= %s
-                AND i.collection = %s
+                WHERE i.datetime >= %(from_date)s
+                AND (ST_XMax(i.geometry) - ST_XMin(i.geometry)) < 180
+                AND i.end_datetime <= %(to_date)s
+                AND i.collection = %(collection)s
                 GROUP BY g.cell_geom
             )
             SELECT json_build_object(
@@ -64,9 +66,66 @@ class Connect:
         """
         
         return query
+    
+    def get_collection(self):
+        """
+        Builds a grid-based spatial aggregation query.
+        """
+        query = """
+            SELECT id
+            FROM pgstac.collections;            
+        """
+        
+        return query
+    
+    def get_extent(self):
+        """
+        Builds a grid-based spatial aggregation query.
+        """
+        query = """
+            SELECT
+            ST_XMin(extent) AS minX,
+            ST_YMin(extent) AS minY,
+            ST_XMax(extent) AS maxX,
+            ST_YMax(extent) AS maxY
+            FROM (
+            SELECT ST_Extent(geometry) AS extent
+            FROM pgstac.items
+            WHERE datetime >= %(from_date)s
+                AND (ST_XMax(geometry) - ST_XMin(geometry)) < 180
+                AND end_datetime <= %(to_date)s
+                AND collection = %(collection)s
+                AND geometry && ST_MakeEnvelope(%(lonmin)s, %(latmin)s, %(lonmax)s, %(latmax)s, 4326)
+            ) AS subquery;
+            
+            """  
+
+        return query      
+    
+    def calculate_extent_resolution(self, lonmin, latmin, lonmax, latmax):
+        """
+        Calculates the spatial extent of the requested query.
+        """
+
+        lon_diff = lonmax-lonmin
+        lat_diff = latmax-latmin
+
+        extent = lon_diff*lat_diff
+
+        if extent <= 360*180 and extent > 90*45:
+            resolution = 2
+        elif extent <= 90*45 and extent > 45*22.5:
+            resolution = 1.5
+        elif extent <= 45*22.5 and extent > 22.5*11.5:
+            resolution = 1
+        elif extent <= 22.5*11.5:
+            resolution = 0.5
+
+        return resolution
+
 
     
-    def send_statement(self, query, from_date, to_date, collection, lonmin, latmin, lonmax, latmax):
+    def send_statement(self, query=None, from_date=None, to_date=None, collection=None, lonmin=None, latmin=None, lonmax=None, latmax=None, resolution=None):
         """
         Executes a SQL query with optional parameters.
         
@@ -84,10 +143,19 @@ class Connect:
                 from_date = self.clean_param(from_date)
                 to_date = self.clean_param(to_date)
 
-                cur.execute(query, (lonmin, lonmax, latmin, latmax, from_date, to_date, collection))
+                params = {"lonmin":lonmin, "lonmax":lonmax, "latmin":latmin, "latmax": latmin, "latmax": latmax, "from_date": from_date, "to_date": to_date, "collection": collection, "resolution": resolution}
+
+                cur.execute(query, params)
+                print(resolution)
                 result = cur.fetchall()
-                print("Results fetched.")
-                return result[0][0]
+                if from_date == "None":
+                    print("Results fetched.")
+                    return result
+                elif resolution == None:
+                    return result[0][0], result[0][1], result[0][2], result[0][3]
+                else:
+                    print("Results fetched.")
+                    return result[0][0]
 
         except Error as e:
             print(f"Error executing query: {e}")

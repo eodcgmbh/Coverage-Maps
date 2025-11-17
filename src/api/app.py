@@ -122,6 +122,9 @@ async def map_page():
         const map = L.map('map').setView([0, 0], 2);
         map.setView([30, 0], 3); 
         let colorbarControl = null;
+        let minVal = 0;
+        let maxVal = 1;
+
 
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -131,13 +134,15 @@ async def map_page():
         let geojsonLayer = null;
 
         function getColor(value) {
-            const ratio = (value - minVal) 
-            const hue = 55 - ratio * 55;  
-            const saturation = 50; 
-            const lightness = 75 - ratio * 25; 
+            const ratio = (value - minVal) / (maxVal - minVal); 
+            
+            const hue = 55 - ratio * 55;    
+            const saturation = 50;     
+            const lightness = 75 - ratio * 25;  
 
             return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
         }
+
 
 
 

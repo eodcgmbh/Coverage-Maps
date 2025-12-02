@@ -1,8 +1,11 @@
 from src.coverage_map.connect.calculate_raster import calculate_raster
 from src.coverage_map.connect.connect_sql import Connect
+from datetime import datetime, timedelta
+from fastapi.responses import JSONResponse
 
 import os
 import time
+
 
 
 def get_res(from_date, to_date, collection, lonmin, latmin, lonmax, latmax):
@@ -27,6 +30,7 @@ def get_coll():
 def main(from_date, to_date, collection, lonmin, latmin, lonmax, latmax):
     conn = Connect()
 
+
     # --- measure Connect() initialization ---
     t0 = time.perf_counter()
     # Connect() already executed above
@@ -47,16 +51,34 @@ def main(from_date, to_date, collection, lonmin, latmin, lonmax, latmax):
 
     # --- send_statement(getextent) ---
     t0 = time.perf_counter()
-    lonmin, latmin, lonmax, latmax = conn.send_statement(
+    lonmin_r, latmin_r, lonmax_r, latmax_r, count = conn.send_statement(
         getextent, from_date, to_date, collection,
         lonmin, latmin, lonmax, latmax
     )
+    if count == 0:
+        return JSONResponse(
+            content={
+                "type": "FeatureCollection",
+                "features": [],
+                "total_count": 0,
+                "message": "No data found for the selected filters."
+            },
+            status_code=200
+        )
+
+
+    
+    lonmin = round(lonmin, 1)
+    latmin = round(latmin, 1)
+    lonmax = round(lonmax, 1)
+    latmax = round(latmax, 1)
     t1 = time.perf_counter()
     print(f"conn.send_statement(getextent) took {t1 - t0:.6f} seconds")
 
+
     # --- calculate_extent_resolution() ---
     t0 = time.perf_counter()
-    resolution = conn.calculate_extent_resolution(lonmin, latmin, lonmax, latmax)
+    resolution = conn.calculate_extent_resolution(lonmin_r, latmin_r, lonmax_r, latmax_r, count)
     t1 = time.perf_counter()
     print(f"conn.calculate_extent_resolution() took {t1 - t0:.6f} seconds")
 
@@ -68,6 +90,7 @@ def main(from_date, to_date, collection, lonmin, latmin, lonmax, latmax):
 
     # --- send_statement(query) ---
     t0 = time.perf_counter()
+    #lonmin, latmin, lonmax, latmax = -180,-90,180,90
     result = conn.send_statement(
         query, from_date, to_date, collection,
         lonmin, latmin, lonmax, latmax, resolution

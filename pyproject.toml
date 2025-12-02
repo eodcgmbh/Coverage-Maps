@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "coverage-map"
-version = "2025.11.3"
+version = "2025.11.4"
 description = ""
 authors = ["Simon Mosonyi <simon.mosonyi@eodc.eu>"]
 readme = "README.md"
@@ -12,6 +12,9 @@ psycopg2 = ">=2.9.11,<3.0.0"
 psycopg2-binary = ">=2.9.11,<3.0.0"
 fastapi = ">=0.120.1,<0.121.0"
 uvicorn = ">=0.38.0,<0.39.0"
+jinja2 = "^3.1.6"
+jsonify = "^0.5"
+flask = "^3.1.2"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

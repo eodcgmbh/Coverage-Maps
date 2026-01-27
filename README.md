@@ -24,13 +24,17 @@ export API_BASE_URL=...
 
 From the project root, build the Docker image:
 
+```bash
 docker build -t stac-coverage-maps .
+```
 
 ### 3. Run the container
 
 Run the container and pass the environment variables:
 
+```bash
 docker run --env-file creds.sh -p 4000:4000 stac-coverage-maps
+```
 
 ### 4. Access the API
 

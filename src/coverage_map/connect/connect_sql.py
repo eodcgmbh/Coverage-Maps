@@ -4,7 +4,13 @@ import psycopg2
 from psycopg2 import OperationalError, Error
 
 class Connect:
-    def __init__(self, host="localhost", port=5000, database=None, user=None, password=None, query=None):
+    def __init__(self, 
+                 host="localhost", 
+                 port=5000, 
+                 database=None, 
+                 user=None, 
+                 password=None, 
+                 query=None):
         self.host = os.environ.get("DB_IP")
         self.port = os.environ.get("DB_PORT")
         self.database = os.environ.get("DB_HOST")
@@ -187,7 +193,16 @@ class Connect:
 
 
     
-    def send_statement(self, query=None, from_date=None, to_date=None, collection=None, lonmin=None, latmin=None, lonmax=None, latmax=None, resolution=None):
+    def send_statement(self, 
+                       query=None, 
+                       from_date=None, 
+                       to_date=None, 
+                       collection=None, 
+                       lonmin=None, 
+                       latmin=None, 
+                       lonmax=None, 
+                       latmax=None, 
+                       resolution=None):
         """
         Executes a SQL query with optional parameters.
         
